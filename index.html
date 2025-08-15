@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trap Button 💫</title>
+  <style>
+    :root{
+      --bg:#f7f7fb;
+      --card:#ffffffcc;
+      --text:#1f2a44;
+      --accent:#6c7cff;
+      --accent-2:#ff7aa2;
+      --btn:#ffffff;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --radius:16px;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0e1116;
+        --card:#141924e6;
+        --text:#e8ecf2;
+        --btn:#1b2130;
+        --shadow:0 10px 30px rgba(0,0,0,.5);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(1200px 700px at 10% -10%, #b8c0ff22 0%, transparent 60%),
+        radial-gradient(1200px 700px at 110% 110%, #ffcfe122 0%, transparent 60%),
+        var(--bg);
+      color:var(--text);
+      display:grid;
+      place-items:center;
+    }
+    .card{
+      width:min(720px, 92vw);
+      background:var(--card);
+      backdrop-filter: blur(10px);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:28px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    h1{
+      margin:4px 0 10px;
+      font-size: clamp(22px, 2.8vw, 30px);
+      letter-spacing:.3px;
+    }
+    p.lead{
+      margin:0 0 20px;
+      opacity:.9;
+      line-height:1.6;
+    }
+    .buttons{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    button{
+      appearance:none; border:0; cursor:pointer;
+      padding:12px 18px; border-radius:12px;
+      font-size:16px; font-weight:600; letter-spacing:.2px;
+      background:var(--btn); color:var(--text);
+      box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 0 0 2px #00000010;
+      transition: transform .12s ease, box-shadow .12s ease, background .2s ease;
+      touch-action: manipulation;
+    }
+    button:hover{ transform: translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,.12)}
+    button:active{ transform: translateY(0)}
+    .yes{ background: linear-gradient(135deg, var(--accent), #8aa2ff); color:#fff }
+    .no { background: linear-gradient(135deg, #ffd9e6, var(--accent-2)); color:#2b1230 }
+    .hint{ margin-top:14px; font-size:13px; opacity:.7 }
+    /* 漂浮微動 */
+    @keyframes floaty{ from{transform:translateY(0)} 50%{transform:translateY(-4px)} to{transform:translateY(0)}}
+    .floaty{ animation: floaty 3.2s ease-in-out infinite }
+    /* Modal */
+    .modal{
+      position:fixed; inset:0; display:none; place-items:center;
+      background: rgba(0,0,0,.35);
+      padding:20px; z-index:50;
+    }
+    .modal.open{ display:grid }
+    .modal .box{
+      width:min(520px, 92vw);
+      background:var(--card); color:var(--text);
+      border-radius:16px; padding:26px; box-shadow:var(--shadow); text-align:center;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:6px;
+      background:#ffffff22; border:1px solid #ffffff2a;
+      color:#fff; padding:6px 10px; border-radius:999px; font-size:12px;
+    }
+    /* 減少動效尊重 */
+    @media (prefers-reduced-motion: reduce){
+      *{ animation:none !important; transition:none !important }
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="region" aria-label="Confession card">
+    <span class="chip" aria-hidden="true">💡 小提示：拒絕鍵會耍賴哦</span>
+    <h1 id="title">可以做我的戀人嗎？</h1>
+    <p class="lead" id="subtitle">認真問的那種 (⁎˃ᆺ˂) — 我會很溫柔很認真對你。</p>
+
+    <div class="buttons">
+      <button class="yes floaty" id="yesBtn" aria-describedby="subtitle">可以</button>
+      <button class="no" id="noBtn">再考慮一下</button>
+    </div>
+
+    <div class="hint" id="hint">* 點「再考慮」可能會發生神祕事件～</div>
+  </main>
+
+  <!-- Modal -->
+  <section class="modal" id="modal" aria-modal="true" role="dialog" aria-labelledby="mTitle" aria-hidden="true">
+    <div class="box">
+      <h2 id="mTitle">耶！被你抓到啦 ✨</h2>
+      <p id="mText">我也喜歡你。從現在起，請多多指教 💖</p>
+      <div class="buttons" style="margin-top:10px">
+        <button class="yes" id="okClose">好～</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // ===== 可自訂區 =====
+    const CONFIG = {
+      title: "可以做我的戀人嗎？",
+      subtitle: "認真問的那種 (⁎˃ᆺ˂) — 我會很溫柔很認真對你。",
+      yesText: "可以",
+      noTexts: [
+        "再考慮一下", "欸…再想想", "還有點害羞", "等等啦 > <",
+        "真的最後一次", "好啦不鬧了", "……好像也不是不行", "唉我輸了"
+      ],
+      finaleText: "耶！被你抓到啦 ✨",
+      finaleDesc: "我也喜歡你。從現在起，請多多指教 💖",
+      // 風格：顏色（可套你網站主題）
+      colors: {
+        accent: "#6c7cff",
+        accent2: "#ff7aa2",
+        bg: null // 例如 "#fafafc"。null = 用預設/系統深淺色
+      },
+      // 按「拒絕」幾次後自動只剩「可以」
+      maxNoClicks: 7,
+      // 是否啟用滑鼠躲避（行動裝置會自動改用抖動/位移）
+      dodgeMouse: true,
+    };
+    // ===== 初始化文案/色彩 =====
+    const $ = s => document.querySelector(s);
+    const title = $("#title"), subtitle = $("#subtitle");
+    const yesBtn = $("#yesBtn"), noBtn = $("#noBtn");
+    const modal = $("#modal"), mTitle = $("#mTitle"), mText = $("#mText"), okClose = $("#okClose");
+    if (CONFIG.title) title.textContent = CONFIG.title;
+    if (CONFIG.subtitle) subtitle.textContent = CONFIG.subtitle;
+    yesBtn.textContent = CONFIG.yesText || "可以";
+    noBtn.textContent = CONFIG.noTexts?.[0] || "再考慮一下";
+
+    if (CONFIG.colors){
+      const r = document.documentElement;
+      if (CONFIG.colors.accent) r.style.setProperty('--accent', CONFIG.colors.accent);
+      if (CONFIG.colors.accent2) r.style.setProperty('--accent-2', CONFIG.colors.accent2);
+      if (CONFIG.colors.bg) r.style.setProperty('--bg', CONFIG.colors.bg);
+    }
+
+    // ===== 互動邏輯 =====
+    let noClicks = 0;
+    const rectLimits = () => {
+      const card = document.querySelector('.card').getBoundingClientRect();
+      return {minX: card.left+10, maxX: card.right-10, minY: card.top+60, maxY: card.bottom-10};
+    };
+
+    function randomMove(btn){
+      const lim = rectLimits();
+      // 隨機位置（避免出界）
+      const x = Math.max(lim.minX, Math.min(lim.maxX-120, Math.random()*(lim.maxX-140)));
+      const y = Math.max(lim.minY, Math.min(lim.maxY-40,  Math.random()*(lim.maxY-80)));
+      btn.style.position = 'absolute';
+      btn.style.left = x + 'px';
+      btn.style.top  = y + 'px';
+    }
+
+    function bumpYes(btn){
+      // 讓「可以」慢慢變大一點點
+      const scale = 1 + Math.min(0.6, (noClicks+1) * 0.06);
+      btn.style.transform = `scale(${scale})`;
+    }
+
+    function updateNoText(){
+      const idx = Math.min(noClicks, CONFIG.noTexts.length-1);
+      noBtn.textContent = CONFIG.noTexts[idx];
+    }
+
+    // 拒絕鍵點擊
+    noBtn.addEventListener('click', () => {
+      noClicks++;
+      updateNoText();
+      bumpYes(yesBtn);
+      if (noClicks >= CONFIG.maxNoClicks){
+        // 關閉拒絕鍵，剩「可以」
+        noBtn.disabled = true;
+        noBtn.style.opacity = .2;
+        noBtn.style.pointerEvents = 'none';
+        noBtn.textContent = "……";
+      } else {
+        // 行動裝置：抖動 + 小位移；桌面：隨機挪位
+        if (matchMedia('(pointer:fine)').matches && CONFIG.dodgeMouse){
+          randomMove(noBtn);
+        } else {
+          noBtn.animate([{transform:'translateY(0)'},{transform:'translateY(-6px)'},{transform:'translateY(0)'}], {duration:260, easing:'ease-out'});
+          const dx = (Math.random() * 80 - 40);
+          const dy = (Math.random() * 40 - 10);
+          const currentLeft = parseFloat(getComputedStyle(noBtn).left || 0);
+          const currentTop  = parseFloat(getComputedStyle(noBtn).top  || 0);
+          noBtn.style.position = 'relative';
+          noBtn.style.left = (currentLeft + dx) + 'px';
+          noBtn.style.top  = (currentTop  + dy) + 'px';
+        }
+      }
+    });
+
+    // 滑鼠接近拒絕鍵時閃避（桌面）
+    if (matchMedia('(pointer:fine)').matches && CONFIG.dodgeMouse){
+      document.addEventListener('mousemove', (e) => {
+        const r = noBtn.getBoundingClientRect();
+        const dist = Math.hypot(
+          e.clientX - (r.left + r.width/2),
+          e.clientY - (r.top  + r.height/2)
+        );
+        if (dist < 120 && !noBtn.disabled){
+          randomMove(noBtn);
+        }
+      });
+    }
+
+    // 同意鍵
+    yesBtn.addEventListener('click', () => {
+      mTitle.textContent = CONFIG.finaleText || "耶！被你抓到啦 ✨";
+      mText.textContent  = CONFIG.finaleDesc || "我也喜歡你。從現在起，請多多指教 💖";
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      // 小小紙屑
+      confettiBurst();
+    });
+
+    okClose.addEventListener('click', () => {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    });
+
+    // 基礎紙屑（無依賴）
+    function confettiBurst(){
+      const N = 32;
+      for (let i=0;i<N;i++){
+        const s = document.createElement('span');
+        s.style.position='fixed';
+        s.style.left = (50 + (Math.random()*40-20)) + '%';
+        s.style.top  = '40%';
+        s.style.width=s.style.height = (6+Math.random()*6) + 'px';
+        s.style.background = i%2 ? 'var(--accent)' : 'var(--accent-2)';
+        s.style.transform = `rotate(${Math.random()*360}deg)`;
+        s.style.borderRadius = '2px';
+        s.style.zIndex=60;
+        document.body.appendChild(s);
+        const dx = (Math.random()*2-1)*120;
+        const dy = 140 + Math.random()*160;
+        s.animate([
+          { transform:`translate(0,0) rotate(0)`, opacity:1 },
+          { transform:`translate(${dx}px, ${dy}px) rotate(${Math.random()*720-360}deg)`, opacity:0 }
+        ], {duration:900+Math.random()*700, easing:'cubic-bezier(.2,.7,.2,1)', fill:'forwards'})
+        .onfinish = ()=> s.remove();
+      }
+    }
+
+    // 可鍵盤操作/無障礙
+    yesBtn.setAttribute('aria-label', '同意');
+    noBtn.setAttribute('aria-label', '再考慮');
+  </script>
+</body>
+</html>
